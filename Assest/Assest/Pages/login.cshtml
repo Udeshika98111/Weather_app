@@ -1,0 +1,132 @@
+﻿@page
+@model Assest.Pages.HomeModel
+@{
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sri Lanka City Weather</title>
+</head>
+<body>
+    <h1>Get Weather for a City in Sri Lanka</h1>
+
+    <label for="city">Enter City Name: </label>
+    <input type="text" id="city" placeholder="Enter city name">
+    <br />
+
+    <button id="getCurrentWeatherBtn" type="button">Get Current Weather</button>
+
+    
+    <button id="getWeeklySummaryBtn" type="button">Get Weekly Summary</button>
+    <div id="weatherInfo"></div>
+
+    <br />
+    <h2>Weekly Forecast</h2>
+    <div id="weeklyForecast"></div>
+
+    <script>
+        //add API key
+        const apiKey = '3446cd9affd57d7ab49fcfe5073cf801';
+
+        const getCurrentWeather = async () => {
+            //get my enter city
+            const city = document.getElementById('city').value;
+            //check the city
+            if (!city) {
+                document.getElementById('weatherInfo').innerHTML = 'Please enter a city name';
+                document.getElementById('weeklyForecast').innerHTML = '';
+                return;
+            }
+            //openweather site
+            const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city},LK&appid=${apiKey}&units=metric`;
+
+            try {
+                const currentWeatherResponse = await fetch(currentWeatherUrl);
+                const currentWeatherData = await currentWeatherResponse.json();
+
+                if (currentWeatherResponse.ok) {
+                    const weatherInfo = `
+                                <h2>Current Weather in ${currentWeatherData.name}, Sri Lanka</h2>
+                                <p>Temperature: ${currentWeatherData.main.temp}°C</p>
+                                <p>Weather: ${currentWeatherData.weather[0].description}</p>
+                                <p>Humidity: ${currentWeatherData.main.humidity}%</p>
+                            `;
+                    document.getElementById('weatherInfo').innerHTML = weatherInfo;
+                }
+
+                else {
+                    document.getElementById('weatherInfo').innerHTML = 'City not found';
+                }
+
+
+            }
+
+            catch (error) {
+                //error massege 
+                console.error('Error fetching weather data:', error);
+                document.getElementById('weatherInfo').innerHTML = 'An error occurred';
+            }
+        };
+
+        // cheack weekly weather 
+        const getWeeklySummary = async () => {
+            const city = document.getElementById('city').value;
+            if (!city) {
+                document.getElementById('weeklyForecast').innerHTML = 'Please enter a city name';
+                return;
+            }
+
+            const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city},LK&appid=${apiKey}&units=metric`;
+
+            try {
+                const forecastResponse = await fetch(forecastUrl);
+                const forecastData = await forecastResponse.json();
+
+                if (forecastResponse.ok) {
+                    const days = {};
+                    forecastData.list.forEach(item => {
+                        const date = item.dt_txt.split(' ')[0];
+                        if (!days[date]) {
+                            days[date] = [];
+                        }
+                        days[date].push(item);
+                    });
+
+                    const weeklySummary = Object.entries(days).map(([date, items]) => {
+                        const avgTemp = items.reduce((sum, item) => sum + item.main.temp, 0) / items.length;
+                        const avgHumidity = items.reduce((sum, item) => sum + item.main.humidity, 0) / items.length;
+                        const description = items[0].weather[0].description;
+
+                        return `
+                                    <div>
+                                        <p>Date: ${date}</p>
+                                        <p>Average Temperature: ${avgTemp.toFixed(2)}°C</p>
+                                        <p>Average Humidity: ${avgHumidity.toFixed(2)}%</p>
+                                        <p>Weather: ${description}</p>
+                                    </div>
+                                `;
+                    }).join('');
+
+                    document.getElementById('weeklyForecast').innerHTML = weeklySummary;
+                }
+                else {
+                    document.getElementById('weeklyForecast').innerHTML = 'Summary not available';
+                }
+            }
+
+            catch (error) {
+                console.error('Error fetching weather data:', error);
+                document.getElementById('weeklyForecast').innerHTML = 'An error occurred';
+            }
+        };
+
+        document.getElementById('getCurrentWeatherBtn').addEventListener('click', getCurrentWeather);
+        document.getElementById('getWeeklySummaryBtn').addEventListener('click', getWeeklySummary);
+    </script>
+</body>
+</html>
+
+<a class="btn btn-primary mt-2" asp-page="thank">Exit</a>
+

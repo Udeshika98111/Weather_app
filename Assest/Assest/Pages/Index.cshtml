@@ -1,0 +1,42 @@
+﻿@page
+@model IndexModel
+@{
+    
+}
+
+    <img src="~/image/ZQ6C.gif" />
+<h2>
+    Hello ...
+</h2>
+    <h6>Enter your user name and password</h6>
+    <div class="text-center">
+        <form method="post" asp-page-handler="login">
+            <table>
+                <tr>
+                    <td>User Name</td>
+                    <td><input type="text" id="username" name="username" placeholder="User name" /><br /></td>
+                </tr>
+                <tr>
+                    <td>Password</td>
+                    <td><input type="password" id="password" name="password" placeholder="Password" /><br /></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <a class="btn btn-primary mt-2" onclick="clearFields()">Clear</a>
+                        <!--<button type="submit" class="btn btn-primary mt-3">Login</button>-->
+                        <a class="btn btn-primary mt-3" asp-page="login">Login</a>
+                    </td>
+                </tr>
+            </table>
+        </form>
+
+        <script>
+            function clearFields() {
+                document.getElementById("username").value = "";
+                document.getElementById("password").value = "";
+            }
+        </script>
+    </div>
+
+
